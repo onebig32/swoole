@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>可可兔聊天室</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link type="text/css" rel="stylesheet" href="style.css">
+		<meta name="Description" content="" />
+		<meta name="Keywords" content="" />
+		<meta name="Author" content="Longbill" />
+        <script src="jquery.js"></script>
+        <script>
+        function init_window()
+        {
+        	$('#main').height($(window).height()-$('#header').height());
+        	$('#content').width($('#chat_window').width()-$('#disconnectwrapper').width()*2-6);
+        	
+			var space = 50;
+			if (navigator.userAgent.match(/msie\s7/i)) space = 50;
+			if (navigator.userAgent.match(/msie\s6/i)) space = 50;
+	
+        	$('#chat_window').height($(window).height()-$('#header').height()-$('#content').height()-space);
+        }
+        init_window();
+        window.onresize = init_window;
+
+        //WebSocket
+         var webSocket = new WebSocket("ws://192.168.33.10:9502");
+		  webSocket.onopen = function (event) {
+		    webSocket.send("加入聊天室!"); 
+		  };
+		  webSocket.onmessage = function (event) {
+		  	console.log(event);
+		  	var data = JSON.parse(event.data)
+		  	//在线人数
+		  	$('#online_num').text(data.total_num);
+		    var pNode=$("<p></p>").html('<b style="color:blue">用户'+data.fd+'</b>'+':<br/>'+data.msg);  
+		    $('#chat_window').append(pNode);
+  		}
+        //发送
+        function sendmsg(){
+        	var content = $('#content').val();
+        	$('#content').val('')
+            webSocket.send(content);
+        }
+        //断开
+        function disconnect(){
+			window.close();
+        }
+        </script>
+    </head>
+    <body scroll="no" style="background-color:#808080">
+        <div id="header">
+        	<div id="header_content">
+        		<table cellpadding="0" cellspacing="0" border="0">
+        			<tr>
+        				<td><span style="margin-left:20px;"><h1>可可兔聊天室</h1></span></td>
+        				<td></td>
+    	       			<td style="text-align:right" valign="middle">
+    	       				在线人数：<b id="online_num"></b>
+    	       			</td>
+    	       		</tr>
+    	       	</table>
+    	    </div>
+        </div> 
+        <div id="main">
+        	<div id="chat">
+        		<div id="chat_window" style="height: 300px;"></div>
+        		<div id="chat_bottom">
+        			<div id="disconnectwrapper" onclick="disconnect()">
+        				断开
+        			</div>
+	        			<textarea id="content" style="margin: 0px 0px 0px 10px; height: 68px; width: 615px;"></textarea>
+        			<div id="sendwrapper" onclick="sendmsg()" >
+        				发送
+        			</div>
+        		</div>
+        	</div>
+        </div>
+    </body>
+</html>
